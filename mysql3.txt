@@ -1,0 +1,33 @@
+Grant select,update,delete on test.* to 'aric'@'localhost' identified by 'abcdef';
+show grants for 'aric'@'localhost';
+select * from mysql.user where user='aric' and host='localhost';
+
+revoke delete on test.* from 'aric'@'localhost';
+
+drop user 'aric'@'localhost';
+
+
+
+
+//创建用户exam1,identified by 后面是密码,*.*表示数据库下的所有表
+grant select,create,drop,super on *.* 
+to 'exam1'@'localhost' identified by '123456'
+with grant option;
+
+create user 'exam2'@'localhost';
+exit;
+mysql -h localhost -u exam2
+set password=password("686868");
+
+
+grant create,drop on *.* to 'exam2'@'localhost';
+show grants for 'exam2'@'localhost';
+
+
+revoke all privileges,grant option from 'exam1'@'localhost','exam2'@'localhost';
+drop user 'exam1'@'localhost';
+drop user 'exam2'@'localhost';
+
+
+//数据的备份与还原
+mysqldump -u root -p databases test test2>E:\backup.sql;

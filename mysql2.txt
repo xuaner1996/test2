@@ -1,0 +1,116 @@
+create database test2;
+use test2;
+
+create table employee(
+   num int(10) unique primary key auto_increment,
+   d_id int(4),
+   name nvarchar(20)  not null,
+   age int(10),
+   sec nvarchar(10),
+   homeaddr nvarchar(40)
+   
+);
+
+drop table employee;
+
+create table department(
+   d_id int(4) primary key,
+   d_name nvarchar(20) not null,
+   function nvarchar(50),
+   address nvarchar(50)
+);
+
+select * from employee;
+select * from department;
+
+insert into department values(1001,'科研部','研发产品','3号楼5层');
+insert into department values(1002,'生产部','生产产品','5号楼1层');
+insert into department values(1003,'销售部','策划销售','1号楼销售大厅');
+insert into department values(1004,'avd','sc','sdf');
+
+
+
+delete from employee where num=1001;
+insert into employee values(1,'1001','张三',26,'男','北京市海淀区');
+insert into employee values(null,'1001','李四',24,'女','北京市昌平区');
+insert into employee values(3,'1002','王五',25,'男','湖南长沙市');
+insert into employee values(4,'1004','Aric',15,'男','England');
+
+
+select num,name,age,sec,department.d_id,d_name,function
+     from employee right join department
+     on employee.d_id=department.d_id;
+
+create table scholarship(
+    level int(10) unique,
+    score int(10)
+);
+
+insert into scholarship values(1,90);
+insert into scholarship values(2,80);
+insert into scholarship values(3,70);
+
+select * from scholarship;
+create table computer_stu(
+    id int(10) unique,
+    name varchar(30),
+    score int(10)
+);
+
+insert into computer_stu values(1001,'Lily',85); 
+insert into computer_stu values(1002,'Tom',91); 
+insert into computer_stu values(1003,'Jim',87); 
+insert into computer_stu values(1004,'Aric',77); 
+insert into computer_stu values(1005,'Lucy',65); 
+insert into computer_stu values(1006,'Andy',99); 
+insert into computer_stu values(1007,'Ada',85); 
+insert into computer_stu values(1008,'Jeck',70); 
+select * from computer_stu;
+
+
+
+
+select *from employee
+where age>24 and exists 
+(select d_name from department 
+where d_id=1004);
+
+
+select 5/0,5 div 0;
+create table t1(
+    a int(10)
+);
+
+insert into t1 values (24);
+select a,a+5+2,a-5-2,a*5*2 from t1;
+select a,a<>23,a!=23,a!=24,a!=null from t1;
+
+select ~1;
+select bin(-1);
+select rand();
+select current_timestamp();
+select now(),unix_timestamp();
+select utc_date(),curdate(),curtime(),utc_time();
+select month(now()),monthname(now());
+select dayname(now()),dayofweek(now()),weekday(now());
+select week(now()),weekofyear(now());
+select version(),connection_id(),database(),schema();
+select user(),system_user(),session_user(),current_user(),current_user;
+
+
+
+
+create table t8(id int auto_increment not null unique);
+insert into t8 values(null);
+insert into t8 values(null);
+insert into t8 values(null);
+insert into t8 values(null);
+insert into t8 values(null);
+insert into t8 values(null);
+select * from t8;
+select last_insert_id();
+
+
+select password('abc');
+select inet_aton('222.201.164.213');
+select benchmark(100000000000,now());

@@ -1,0 +1,82 @@
+D:
+cd mysql-5.6.26-winx64\bin
+net start mysql
+mysql -u root -p
+show databases;
+use test;
+create database test1;
+drop database test1 if exists;
+
+
+//关于触发器
+create database test2;
+use test2;
+create table product(
+ id int(10) not null unique primary key,
+ name varchar(20) not null,
+ function varchar(50),
+ company varchar(20)  not null,
+ address varchar(50)
+);
+
+
+create table operate(
+op_id int(10) not null primary key auto_increment,
+op_name varchar(20) not null,
+op_time time not null
+);
+
+describe operate;
+show create table operate;
+
+create trigger product_bf_insert before insert
+         on product for each row
+         insert into operate values(null,'insert product',now());
+
+drop trigger product_bf_insert;
+
+create trigger product_af_def after delete
+         on product for each row 
+         insert into operate values (null,'delete product',now());
+
+
+create trigger product_af_update after update
+        on product for each row
+        insert into operate values(null,'Update product',now());
+insert into product values(1,'abc','治疗感冒','北京abc制药厂','北京市昌平区');
+update product set address='HaiDian Beijing' where id=1;
+
+delete from product where id=1;
+
+
+select * from operate;
+
+
+
+show triggers;
+select * from information_schema.triggers;
+select * from information_schema.triggers where trigger_name='product_bf_insert';
+
+//删除触发器
+drop trigger product_bf_insert;
+select * from information_schema.triggers where trigger_name='product_bf_insert'\g
+
+drop trigger product_af_update;
+
+
+
+
+//修改用户名和密码
+mysqladmin -u root -p password "jinyu"
+//update 
+update mysql.user set password=password("123456")
+where user ="root" and host="localhost";
+flush privileges;
+//SET 
+set password = password("123456");
+
+
+//密码丢失
+mysqld --skip-grant-tables
+
+

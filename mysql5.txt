@@ -1,0 +1,293 @@
+create database example;
+//检查支持的引擎
+show variables like 'have%';
+//查询默认引擎
+show variables like 'storage_engine';
+create database school;
+drop database school;
+show databases;
+//多字段主键
+create table example2(
+	stu_id int,
+	course_id int,
+	grade float,
+	primary key(stu_id,course_id)
+);
+//设置外键
+
+create table example3(
+	id int primary key,
+	stu_id int,
+	course_id int,
+	constraint c_fk foreign key(stu_id,course_id)
+	references example2(stu_id,course_id)
+);
+
+desc example2;
+show create table example2;
+alter table example2 rename ex;
+alter table ex modify grade varchar(30);
+alter table ex change grade mygrade varchar(30);
+alter table ex change mygrade grade float;
+alter table ex add phone varchar(20);
+alter table ex add age int(4) not null;
+alter table ex add num int(8) primary key first;//在没有主键的情况下
+alter table ex add address varchar(30) not null after course_id;
+
+
+alter table ex drop address;
+alter table ex modify grade varchar(30) first;//这样也可以改变属性
+alter table ex modify grade tinyint(1)  after age;
+
+
+//删除外键约束
+alter table example3 drop foreign key c_fk;
+show create table example3;
+//原来的键变为普通键
+//给已经建好的表添加外键
+alter table example3 add constraint c_fk foreign key(stu_id,course_id) references ex(stu_id,course_id);
+drop table ex;
+
+//chapter 6
+
+create database ch6;
+use ch6;
+create table student(num int(10) not null unique primary key,
+	name varchar(20) not null,
+	sex varchar(4) not null,
+	birthday datetime,
+	address varchar(50)
+	);
+
+desc student;
+create table grade (
+	id int(10) not null unique primary key auto_increment,
+	course varchar(10) not null,
+	s_num int(10) not null,
+	grade varchar(4),
+	constraint grade_fk foreign key (s_num)
+	references student(num)
+);
+
+show create table grade ;
+alter table grade modify course varchar(20);
+desc grade;
+alter table grade modify s_num int(10) after id;
+desc grade;
+alter table grade change grade score varchar(4);
+desc grade;
+alter table grade engine=Myisam;
+alter table grade drop foreign key grade_fk;
+show create table grade;
+alter table grade engine = myisam;
+show create table grade;
+alter table student drop address;
+desc student;
+alter table student add phone int(10);
+desc student;
+alter table grade rename gradeinfo;
+show tables;
+drop table student;
+
+
+
+//ch6.1
+
+create database ch61;
+create table teacher (
+	id int(4) not null unique primary key auto_increment,
+	num int(10) not null unique,
+	name varchar(20) not null,
+	sex varchar(4) not null,
+	birthday datetime,
+	address varchar(50)
+	);
+
+alter table teacher modify name varchar(30) not null;
+alter table teacher modify birthday datetime after name;
+desc teacher;
+alter table teacher change num t_id int(10) not null;
+alter table teacher drop address;
+alter table teacher add wages float;
+desc teacher;
+alter table teacher rename teacherinfo;
+alter table teacherinfo engine = myisam;
+show create table teacherinfo;
+
+
+create database test62;
+use test62;
+create table department (
+	d_id int(4) not null unique primary key ,
+	d_name varchar(20) not null unique,
+	function varchar(50),
+	address varchar(50)
+	);
+//外键设置：被依赖字段必须是主键或者组合主键中的一个
+create table worker(
+	id int(40) not null unique primary key auto_increment,
+	num int(10) not null unique,
+	d_id int(4),
+	name varchar(20) not null,
+	birthday date,
+	address varchar(50),
+	constraint worker_fk foreign key (d_id) 
+	references department(d_id)
+	);
+drop table department;
+alter table worker drop foreign key worker_fk;
+drop table department;
+
+//第七章：索引
+//提高检索速度，但是创建和维护需要耗费时间
+create database ch71;
+use ch71;
+create table user (
+	userid int(10) not null unique primary key auto_increment,
+	username varchar(20) not null,
+	passwd varchar(20) not null,
+	info text,
+	unique index index_uid(userid desc),
+	index index_user (username,passwd),
+	fulltext index index_info(info)
+	)engine = myisam;
+show create table user;
+create table information (
+	id int(10) not null unique primary key,
+	name varchar(20) not null,
+	sex varchar(4) not null,
+	birthday date,
+	address varchar(50),
+	tel varchar(20),
+	pic blob
+	);
+show create table information;
+create index index_name on information(name(10));
+create index index_bir on information(birthday,address);
+alter table information add index index_id(id asc);
+show create table information;
+show create table user;
+drop index index_user on user;
+show create table user;
+
+drop index index_name on information ;
+show create table information;
+//第八章：视图
+//使数据简单化，增强数据安全性、提高表的逻辑独立性
+//在原有的表或者视图的基础上重新定义的虚拟表
+create database ch81;
+use ch81;
+create table work_info (
+	id int(10)  not null unique primary key,
+	name varchar(20) not null,
+	sex varchar(4) not null,
+	age int(5),
+	address varchar(50),
+	tel varchar(20)
+	);
+
+insert into work_info values(1,'zhangsan','m',18,'beijingshihaidianqu','1234567');
+insert into work_info values(2,'lisi','m',22,'beijingshicahngpingqu','2345678');
+insert into work_info values(3,'wangwu','f',17,'hubeishengyongzhoushi','3456789');
+insert into work_info values(4,'zhaoliu','f',25,'liaoningshengfuxinshi','4567890');
+
+select * from work_info;
+
+create algorithm = merge view
+ info_view(id,name,sex,address)
+ as select id,name,sex,address
+ from work_info where age>20 
+ with local check option;
+
+ desc info_view;
+ show create view info_view;
+ 
+ alter algorithm = merge view 
+ 	info_view(ia,name,sex,address)
+ 	as select id , name ,sex,address
+ 	 	 from work_info where age <20 
+ 	 	 with local check option;
+
+update info_view set sex='M' where ia = 3;
+//视图中数据的改变会使得原来数据库中的数据也发生改变
+drop view info_view;
+desc info_view;
+
+create database ch82;
+use ch82;
+create table college(
+	number int(10) unique not null primary key,
+	name varchar(20) not null,
+	major varchar(20) not null,
+	age int(5) 
+);
+
+create algorithm = undefined view 
+	college_view(student_num, student_name,student_age,department)
+	as select number,name,age,major from college
+	with local check option; 
+show tables;
+show create view college_view;
+insert into college_view values(0901,'zhangsan',20,'waiyu');
+insert into college_view values(0902,'lisi',22,'computer');
+insert into college_view values(0903,'wangwu',19,'computer');
+
+select * from college;
+
+create or replace algorithm=undefined view
+	college_view (student_num,student_name,student_age,department)
+	as select number , name,age,major
+	from college where major='computer'
+	with local check option;
+
+
+desc college_view;
+drop view college_view;
+
+
+ch9触发器
+create database ch91;
+use ch91;
+create table product (id int(10) not null unique primary key,
+	name varchar(20) not null,
+	function varchar(50),
+	company varchar(20) not null,
+	address varchar(50)
+	);
+create table operate (op_id int(10) not null unique primary key auto_increment,
+	op_name VARCHAR(20) not null,
+	op_time time not null
+);
+
+
+create trigger product_of_insert before insert
+	on product for each row
+	insert into operate values(null,'insert product',now());
+
+select * from information_schema.triggers where trigger_name='product_of_insert';
+
+
+create trigger product_of_update after update
+	on product for each row 
+	insert into operate values(null,'update values',now());
+
+create trigger roduct_af_del after delete 
+	on product for each row
+	insert into operate values(null,'delete values',now());
+insert into product values(1,'abc','zhiliaoganmao','beijingabc','cahngpingqu');
+select * from operate;
+
+update product set address='haidianqu' where id=1;
+select * from operate;
+
+delete from product where id = 1;
+select * from operate;
+
+drop trigger product_of_insert;
+select * from information_schema.triggers where trigger_name ='product_bf_insert';
+drop trigger product_of_update;
+
+
+
+create database ch92;
+use ch92;

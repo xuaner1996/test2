@@ -1,0 +1,28 @@
+show variables like "have_%";
+
+create table dbtest(
+		id int(4)	
+	)engine=innodb;
+
+//commit后一个事务就结束了？begin; rollback;commit
+select * from dbtest;
+
+begin;
+insert into dbtest values(5);
+insert into dbtest values(6);
+
+commit;
+select * from dbtest;
+
+begin;
+insert into dbtest values(7);
+rollback;
+select * from dbtest;
+commit;
+select * from dbtest;
+insert into dbtest values(7);
+
+
+
+
+
